@@ -1,0 +1,49 @@
+---
+title: "Selenium_WHO_reports"
+author: "Emma"
+date: "20/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+You might have noticed that not all reports were downloaded from the WHO page. The WHO switched from daily to weekly reports on 16 August 2020. The reason is that you need click 'see more' to see the links but this doesn't change the main URL so it is not included when we use only `rvest`.
+
+Let's grab the link again.
+```{r}
+covid_reports <- 'https://www.who.int/emergencies/diseases/novel-coronavirus-2019/situation-reports'
+```
+
+Selenium
+
+```{r}
+rD <- rsDriver(port = 4444L)
+
+remDr <- rD$client
+
+remDr$navigate(covid_reports)
+html_before_clicking <- remDr$getPageSource()[[1]]
+```
+
+
+```{r}
+webElem <- remDr$findElement(using = "css", "[class = 'more-button']")
+webElem$clickElement()
+html <- remDr$getPageSource()[[1]]
+```
+Close
+```{r}
+remDr$close()
+```
+
+
+```{r}
+xml_child(html_rvest, 2) %>% html_children()
+
+xml_child(html_selenium, 2) %>% html_children()
+```
+
+
+
