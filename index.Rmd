@@ -33,7 +33,7 @@ RStudio certified trainer
 R-Ladies London organiser
 ---
 # Housekeeping
-Slido/chat for interaction 
+Chat for interaction 
 
 Questions in chat or just interrupt me 
 
@@ -43,6 +43,7 @@ Cameras on or off – always nice to see people’s faces but it is your choice
 
 45min + 15 break final session will be 30 min  - do step away if you need to
 
+https://emmavestesson.github.io/web-scraping/#1
 
 ---
 
@@ -72,6 +73,9 @@ class: inverse, middle, centre
 - Start a new project from git
 - Install packages
 ---
+
+
+
 # Web scraping
 
 ```{r setup, include=FALSE}
@@ -214,7 +218,7 @@ Load the package
 library(tidyverse)
 library(lubridate)
 ```
-
+---
 
 ![](bookcase.jpg)
 
@@ -294,7 +298,7 @@ class: middle
 
 ---
 class: inverse, middle, centre
-# break
+# Break
 
 ---
 
