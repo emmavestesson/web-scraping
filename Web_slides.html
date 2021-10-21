@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Data scraping using R</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Emma Vestesson" />
+    <meta name="date" content="2021-10-22" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/fc.css" rel="stylesheet" />
+    <link href="libs/remark-css/chocolate-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Data scraping using R
+### Emma Vestesson
+### 2021-10-22
+
+---
+
+
+
+
+# About me 
+
+10 years working as a data analyst – primarily in healthcare 
+
+Started my career in Geneva and then moved to London 
+
+Senior data analyst at a health care charity
+
+Part-time PhD student at UCL - clinical data science
+
+One year placement at the Alan Turing Institute - the UK's national institute for data science and artificial intelligence
+
+RStudio certified trainer
+
+R-Ladies London organiser
+---
+# Housekeeping
+Slido/chat for interaction 
+
+Questions in chat or just interrupt me 
+
+Please stay muted unless you are asking a question 
+
+Cameras on or off – always nice to see people’s faces but it is your choice 
+
+45min + 15 break final session will be 30 min  - do step away if you need to
+
+
+---
+
+# Workshop aim
+
+- Know what web scraping is
+- Automate tasks
+- Copy data without copying and pasting manually from a website
+- You will not be experts users after 3.5h but you should  know what is possible and be comfortable learning more own your own or in more advanced courses 
+- Many of the functions we will cover can be used for different types of data science work
+
+---
+class: middle
+# Tools we will be using today
+
+- RStudio cloud
+- web browser (ideally chrome)
+- SelectorGadget
+- selenium
+
+---
+class: inverse, middle, centre
+
+# Let's head over to Rstudio.cloud
+
+- Sign into rstudio.cloud 
+- Start a new project from git
+- Install packages
+---
+# Web scraping
+
+
+- Use a computer programme to extract and save information from a website 
+- Also known as data scraping 
+
+---
+
+# Is data scraping legal? 
+
+- Often legal but not always polite 
+
+Web scraping is much faster than a human using a website 
+  - Risk overloading websites
+  
+  - Could get you banned (criminal offence) 
+  
+  - Could get everyone at your university banned
+
+
+- How you use the data matters – still need to respect copyright, GDPR (personal data) 
+
+
+- Selling the data is dodgy 
+
+- 'Fair use' will probably cover most of what you want to do
+
+
+
+
+---
+class: center
+
+# Legal `\(\neq\)` ethical 
+
+.pull-left[
+![](bbc_scraping.png)
+]
+
+
+
+.pull-right[
+![](public_health_ethics.png)
+]
+---
+
+# How to check if a website can be scraped
+
+- Check robots.txt 
+
+- Check terms of references 
+
+Let's look at some robots.txt files [wikipedia](https://en.wikipedia.org/robots.txt)
+---
+
+# Examples of using web scraping 
+
+- Scrape prices on website to detect a drop in prices 
+
+- Automatically download a data item every day - can save valuable time
+
+- Bulk download files
+
+- Analyse the sentiment of comments on websites or pages such as reddit 
+
+- Link google analytics data to information on website
+
+
+
+
+---
+class: 
+
+# Alternatives to web scraping 
+
+Looking for alternatives can save you a lot of time 
+
+- Simply ask for the data
+- Files made available for download - this is getting more and more common
+
+- APIs - eg pubmed, twitter 
+
+
+- These can be combined with light touch web scraping eg to get file paths 
+---
+
+
+# Polite scraping 
+
+Check what you are allowed to scrape - certain sub-pages might be excluded 
+
+Pace yourself – add a break to slow down your scraper 
+![](banned.png)
+
+Only download and save what you actually need 
+
+Storing the data can be a separate legal issue
+
+---
+
+# pipe
+Simplifying R code with pipes (%&gt;%)
+
+
+nested statement
+```r
+leave_house(get_dressed(get_out_of_bed(wake_up(me))))
+```
+VS
+
+piped statement
+```r
+me %&gt;% 
+  wake_up() %&gt;% 
+  get_out_of_bed() %&gt;% 
+  get_dressed() %&gt;% 
+  leave_house()
+```
+
+**Keyboard shortcut ctrl+shift +m**
+
+
+---
+
+# Packages
+
+
+The first time you use a package you need to install the package. 
+
+```r
+install.packages("tidyverse")
+```
+
+Load the package
+
+```r
+library(tidyverse)
+library(lubridate)
+```
+
+
+![](bookcase.jpg)
+
+---
+
+# Polite package
+
+Checks the robots.txt file for you
+
+
+```r
+library(polite)
+bow('https://www.facebook.com/')
+```
+
+```
+## &lt;polite session&gt; https://www.facebook.com/
+##     User-agent: polite R package - https://github.com/dmi3kno/polite
+##     robots.txt: 479 rules are defined for 20 bots
+##    Crawl delay: 5 sec
+*##   The path is not scrapable for this user-agent
+```
+---
+
+# Basic html
+
+- Hyper Text Markup Language 
+
+- elements and child elements
+- some elements have attributes
+
+
+
+
+
+
+
+
+---
+
+# Reading in a html page
+
+`scrape` returns a html document. It automatically includes a delay based on what the website requested. 
+
+```r
+starwars_page &lt;- "https://rvest.tidyverse.org/articles/starwars.html"
+starwars_page %&gt;% 
+  bow() %&gt;%
+  scrape()
+```
+
+```
+## {html_document}
+## &lt;html lang="en"&gt;
+## [1] &lt;head&gt;\n&lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;\n&lt;meta charset=" ...
+## [2] &lt;body data-spy="scroll" data-target="#toc"&gt;\n    &lt;div class="container template-article"&gt;\n  ...
+```
+---
+# rvest
+
+- `html_elements()`
+
+- `html_children()`
+
+- `html_attrs()` - prints all attributes
+
+- `html_attr()` - selects an attribute
+
+- `html_text()`
+
+---
+
+# Select elements
+Returns an xml_nodeset
+
+```r
+library(rvest)
+starwars_page %&gt;% 
+  bow() %&gt;%
+  scrape() %&gt;% 
+  rvest::html_elements('section') 
+```
+
+```
+## {xml_nodeset (7)}
+## [1] &lt;section&gt;&lt;h2 data-id="1"&gt;\nThe Phantom Menace\n&lt;/h2&gt;\n&lt;p&gt;\nReleased: 1999-05-19\n&lt;/p&gt;\n&lt;p&gt;\n ...
+## [2] &lt;section&gt;&lt;h2 data-id="2"&gt;\nAttack of the Clones\n&lt;/h2&gt;\n&lt;p&gt;\nReleased: 2002-05-16\n&lt;/p&gt;\n&lt;p&gt; ...
+## [3] &lt;section&gt;&lt;h2 data-id="3"&gt;\nRevenge of the Sith\n&lt;/h2&gt;\n&lt;p&gt;\nReleased: 2005-05-19\n&lt;/p&gt;\n&lt;p&gt;\ ...
+## [4] &lt;section&gt;&lt;h2 data-id="4"&gt;\nA New Hope\n&lt;/h2&gt;\n&lt;p&gt;\nReleased: 1977-05-25\n&lt;/p&gt;\n&lt;p&gt;\nDirector ...
+## [5] &lt;section&gt;&lt;h2 data-id="5"&gt;\nThe Empire Strikes Back\n&lt;/h2&gt;\n&lt;p&gt;\nReleased: 1980-05-17\n&lt;/p&gt;\n ...
+## [6] &lt;section&gt;&lt;h2 data-id="6"&gt;\nReturn of the Jedi\n&lt;/h2&gt;\n&lt;p&gt;\nReleased: 1983-05-25\n&lt;/p&gt;\n&lt;p&gt;\n ...
+## [7] &lt;section&gt;&lt;h2 data-id="7"&gt;\nThe Force Awakens\n&lt;/h2&gt;\n&lt;p&gt;\nReleased: 2015-12-11\n&lt;/p&gt;\n&lt;p&gt;\nD ...
+```
+
+
+
+
+---
+class: middle
+# How do I know what elements to select? 
+
+- selector gadget
+- inspect page
+- looking at raw html
+- a lot of trial and error
+
+---
+class: inverse, middle, centre
+# break
+
+---
+
+# Mass download reports
+
+- Check that we are allowed to scrape website
+- Write code to download one report
+- A few minutes for you to have a play
+- Write code to give the report a sensible name
+- Get url for all landing pages for the reports
+- Combine all our code
+- Test that code runs for a small number of URLs
+- Ready to download all reports!
+---
+# Iterate over functions
+
+```r
+library(purrr)
+map(c('Emma', 'Kyle', 'Maryam'), ~paste('Hello', .x))
+```
+
+```
+## [[1]]
+## [1] "Hello Emma"
+## 
+## [[2]]
+## [1] "Hello Kyle"
+## 
+## [[3]]
+## [1] "Hello Maryam"
+```
+
+---
+
+# Schedule web scraping
+
+Some web pages update a file on a regular basis and everything but the download URL stays the same.
+
+- Check that we are allowed to scrape website
+- Write code to download file
+- Write code to give the file a sensible name
+- Use cronR or taskscheduleR to schedule regular downloads
+
+You can't turn your computer off. 
+
+
+---
+# APIs 
+
+**Wikipedia definition** : An application programming interface (API) is a computing interface which defines interactions between multiple software intermediaries.
+
+APIs are provided to move traffic away from the main website
+
+APIs can be a good alternative to web scraping.
+
+Will most likely save you time
+
+Removes most of the concerns around legality and ethics around accessing- if data is available through the API then it is fine to download
+---
+
+# Medrxiv
+
+First we will head over to https://www.medrxiv.org/robots.txt
+Let's look at the `medrxivr` package and the biorxiv API https://api.biorxiv.org/
+
+
+```r
+library(medrxivr)
+```
+
+
+
+---
+class: middle
+# Selenium
+
+&gt;Selenium automates browsers. That's it!
+What you do with that power is entirely up to you
+
+--
+
+Selenium requires a bit of work to install so I will demo
+We are going back to the WHO page with all the reports again
+
+---
+class: inverse, middle, center
+
+# Thank you
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
