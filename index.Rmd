@@ -75,6 +75,7 @@ class: inverse, middle, centre
 ---
 
 
+---
 
 # Web scraping
 
@@ -84,6 +85,7 @@ library(rvest)
 ```
 - Use a computer programme to extract and save information from a website 
 - Also known as data scraping 
+- Can be performed using a programming language such as R or python or a 'point and click' tool
 
 ---
 
@@ -99,10 +101,11 @@ Web scraping is much faster than a human using a website
   - Could get everyone at your university banned
 
 
-- How you use the data matters – still need to respect copyright, GDPR (personal data) 
+- How you use the data matters 
+  – still need to respect copyright, 
+  - GDPR (personal data) 
+  -Selling the data is dodgy 
 
-
-- Selling the data is dodgy 
 
 - 'Fair use' will probably cover most of what you want to do
 
@@ -237,16 +240,12 @@ bow('https://www.facebook.com/')
 # Basic html
 
 - Hyper Text Markup Language 
+- Head and body
+- Elements and child elements
+- Some elements have attributes
+  - href or src
 
-- elements and child elements
-- some elements have attributes
-
-
-
-
-
-
-
+Let's look at some raw html - [R project website](https://www.r-project.org/)
 
 ---
 
@@ -270,7 +269,9 @@ starwars_page %>%
 
 - `html_attr()` - selects an attribute
 
-- `html_text()`
+- `html_text()` - turn the object into text
+
+- `html_name()`
 
 ---
 
