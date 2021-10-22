@@ -60,9 +60,9 @@ class: middle
 # Tools we will be using today
 
 - RStudio cloud
-- web browser (ideally chrome)
+- Web browser (ideally chrome)
 - SelectorGadget
-- selenium
+- Selenium
 
 ---
 class: inverse, middle, centre
@@ -73,7 +73,10 @@ class: inverse, middle, centre
 - Start a new project from git
 - Install packages
 ---
+class: inverse, middle, centre
 
+- Where are you joining from? 
+- Have you tried to use webscraping before?
 
 ---
 
