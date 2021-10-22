@@ -354,14 +354,27 @@ Removes most of the concerns around legality and ethics around accessing- if dat
 # Medrxiv
 
 First we will head over to https://www.medrxiv.org/robots.txt
+
+---
+# If you wanted to scrape medrxiv
+
+- search for papers
+- scrape links to papers
+- download papers
+
+--
+
+```{r}
+polite::bow('https://www.medrxiv.org/search/AMR')
+```
+---
+# Luckily there is an API!
 Let's look at the `medrxivr` package and the biorxiv API https://api.biorxiv.org/
 
 ```{r}
 library(medrxivr)
 
 ```
-
-
 
 ---
 class: middle
